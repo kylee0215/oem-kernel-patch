@@ -1,0 +1,51 @@
+name: Generate Daily Report
+
+on:
+    schedule:
+    # This runs the script every day at 05:30 UTC
+        - cron: '30 5 * * *'
+    workflow_dispatch:
+    # This allows you to run the script manually from the "Actions" tab
+
+permissions:
+    contents: write
+
+env:
+    # Full source link. Change this one variable if the delta URL changes;
+    # the output filename is derived from the URL's stem, e.g.
+    # .../oem-6.17-resolute.html -> reports/oem-6.17-resolute_enhanced.html
+    SOURCE_URL: https://kernel.ubuntu.com/oem-delta/oem-6.17-resolute.html
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.10'
+
+        - name: Install dependencies
+          run: pip install -r requirements.txt
+
+        - name: Generate enhanced HTML report
+          run: |
+            mkdir -p reports
+            # Derive the output name from the source URL's filename stem
+            stem=$(basename "$SOURCE_URL" .html)
+            python check_kernel_team_emails.py \
+              "$SOURCE_URL" \
+              --format html \
+              --html-output "reports/${stem}_enhanced.html"
+
+        - name: Commit and push reports
+          run: |
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add reports/
+            # Only commit if the file actually changed to avoid empty commit errors
+            git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Report Update: $(date)" && git push)
