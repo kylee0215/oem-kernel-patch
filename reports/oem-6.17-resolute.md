@@ -1,18 +1,18 @@
 # Kernel-Team Email Check — oem-6.17-resolute
 
-_Generated: 2026-08-25 05:56:54 UTC_
+_Generated: 2026-08-25 06:39:28 UTC_
 
 **Source:** https://kernel.ubuntu.com/oem-delta/oem-6.17-resolute.html
 
 **Checked against:** last 3 month(s) of kernel-team archives
 
-**Summary:** 22 found, 7 not found · 0 ready to apply (ACK'd with ≥2 ACKs)
+**Summary:** 23 found, 6 not found · 0 ready to apply (ACK'd with ≥2 ACKs)
 
 ## All checked commits
 
 | Hash | Subject | Public bug | Private bug | Emailed? | Version | Match | Link | Found In | Signed-off-by |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `e9c4c6c91471` | ASoC: sdw_utils: Add missed component_name strings for TI amps | [2164504](https://bugs.launchpad.net/bugs/2164504) | [stella-3568](https://warthogs.atlassian.net/browse/stella-3568) | No | - | - | - | - | Chia-Lin |
+| `e9c4c6c91471` | ASoC: sdw_utils: Add missed component_name strings for TI amps | [2164504](https://bugs.launchpad.net/bugs/2164504) | [stella-3568](https://warthogs.atlassian.net/browse/stella-3568) | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171150.html) | August 2026 | Chia-Lin |
 | `38573fd563ab` | ASoC: SDCA: Move kcontrol search out of IRQ | [2163215](https://bugs.launchpad.net/bugs/2163215) | - | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171131.html) | August 2026 | Chris |
 | `d9db0ad11c05` | ASoC: SDCA: Switch to fixup_controls callback for IRQ registration | [2163215](https://bugs.launchpad.net/bugs/2163215) | - | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171130.html) | August 2026 | Chris |
 | `0f380e30f69f` | ASoC: Add a component fixup_controls callback | [2163215](https://bugs.launchpad.net/bugs/2163215) | - | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171129.html) | August 2026 | Chris |
