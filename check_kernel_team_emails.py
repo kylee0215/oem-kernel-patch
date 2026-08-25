@@ -49,7 +49,8 @@ def download_html(url):
 def get_commits_from_html(html_content, sob_filter=None):
     """Extract and filter unlanded commits directly from OEM delta HTML content.
 
-    Returns a list of dicts with keys: hash, subject, sob.
+    Returns a list of dicts with keys: hash, subject, sob, public_bug,
+    private_bugs, oem_project.
     """
     tabledata = extract_tabledata_from_html(html_content)
     print(f"  Found {len(tabledata)} total commits in HTML")
@@ -72,6 +73,9 @@ def get_commits_from_html(html_content, sob_filter=None):
             'hash': c['hash'][:12],
             'subject': c['subject'],
             'sob': c.get('sob', ''),
+            'public_bug': c.get('public_bug', ''),
+            'private_bugs': c.get('private_bugs', ''),
+            'oem_project': c.get('oem_project', ''),
         }
         for c in filtered
     ]
@@ -527,6 +531,112 @@ def generate_enhanced_html(original_html, results_dict):
     return new_html
 
 
+def _md_cell(text):
+    """Escape a value so it is safe inside a Markdown table cell."""
+    if text is None:
+        return ''
+    text = str(text).replace('\r', ' ').replace('\n', ' ')
+    return text.replace('|', '\\|')
+
+
+def _format_public_bug(value):
+    """Render the public_bug field as a Launchpad link (or '-')."""
+    value = (value or '').strip()
+    if not value:
+        return '-'
+    parts = []
+    for bug in re.split(r'[,\s]+', value):
+        bug = bug.strip()
+        if not bug:
+            continue
+        if bug.isdigit():
+            parts.append(f"[{bug}](https://bugs.launchpad.net/bugs/{bug})")
+        else:
+            parts.append(_md_cell(bug))
+    return ', '.join(parts) if parts else '-'
+
+
+def _format_private_bugs(value):
+    """Render the private_bugs field (a stringified list) as Jira links (or '-')."""
+    tickets = []
+    if isinstance(value, (list, tuple)):
+        tickets = list(value)
+    elif value:
+        try:
+            import ast
+            parsed = ast.literal_eval(value)
+            tickets = parsed if isinstance(parsed, (list, tuple)) else [parsed]
+        except (ValueError, SyntaxError):
+            tickets = re.split(r'[,\s]+', str(value).strip('[]'))
+    parts = []
+    for ticket in tickets:
+        ticket = str(ticket).strip().strip("'\"")
+        if not ticket:
+            continue
+        parts.append(f"[{_md_cell(ticket)}](https://warthogs.atlassian.net/browse/{ticket})")
+    return ', '.join(parts) if parts else '-'
+
+
+def generate_markdown_report(results, source, months, found_count, not_found_count):
+    """Build a GitHub-friendly Markdown report from the results list.
+
+    Renders a native Markdown table (which GitHub displays as a real table),
+    unlike the enhanced HTML whose rows live in a client-side JS array.
+    """
+    ready = [r for r in results
+             if r['found'] and _is_ack(r['email_prefix']) and r['ack_count'] >= 2]
+
+    lines = []
+    lines.append(f"# Kernel-Team Email Check — {Path(urlparse(source).path).stem or source}")
+    lines.append("")
+    lines.append(f"_Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC_")
+    lines.append("")
+    lines.append(f"**Source:** {source}")
+    lines.append("")
+    lines.append(f"**Checked against:** last {months} month(s) of kernel-team archives")
+    lines.append("")
+    lines.append(
+        f"**Summary:** {found_count} found, {not_found_count} not found · "
+        f"{len(ready)} ready to apply (ACK'd with ≥2 ACKs)"
+    )
+    lines.append("")
+
+    if ready:
+        lines.append("## Ready to apply (≥2 ACKs)")
+        lines.append("")
+        for r in ready:
+            lines.append(
+                f"- `{_md_cell(r['hash'])}` "
+                f"{_md_cell(format_email_status(r['email_prefix'], r['ack_count']))} — "
+                f"{_md_cell(r['subject'])}"
+            )
+        lines.append("")
+
+    lines.append("## All checked commits")
+    lines.append("")
+    lines.append("| Hash | Subject | Public bug | Private bug | Emailed? | Version | Match | Link | Found In | Signed-off-by |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    for r in results:
+        if r['found']:
+            status = (format_email_status(r['email_prefix'], r['ack_count'])
+                      if r['email_prefix'] else 'sent')
+            version = f"v{r['version']}" if r['version'] is not None else '-'
+            match = f"{r['score']}%"
+            found_in = ', '.join(r['found_in']) if r['found_in'] else '-'
+            link = f"[email]({r['link']})" if r.get('link') else '-'
+        else:
+            status, version, match, found_in, link = 'No', '-', '-', '-', '-'
+        lines.append(
+            f"| `{_md_cell(r['hash'])}` | {_md_cell(r['subject'])} | "
+            f"{_format_public_bug(r.get('public_bug'))} | "
+            f"{_format_private_bugs(r.get('private_bugs'))} | "
+            f"{_md_cell(status)} | {version} | {match} | {link} | {_md_cell(found_in)} | "
+            f"{_md_cell(r.get('sob', ''))} |"
+        )
+    lines.append("")
+    return '\n'.join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Check if unlanded commits have been sent to kernel-team mailing list',
@@ -565,14 +675,20 @@ Examples:
     
     parser.add_argument(
         '--format',
-        choices=['text', 'html'],
+        choices=['text', 'html', 'markdown'],
         default='text',
-        help='Output format: text report or enhanced HTML (default: text)'
+        help='Output format: text report, enhanced HTML, or Markdown (default: text)'
     )
     
     parser.add_argument(
+        '-o', '--output',
+        help='Output file name (for --format html or markdown). '
+             'Defaults to <input>_enhanced.html or <input>.md'
+    )
+
+    parser.add_argument(
         '--html-output',
-        help='Output HTML file name (only for --format html)'
+        help='Deprecated alias for --output (kept for backwards compatibility)'
     )
 
 
@@ -714,6 +830,10 @@ Examples:
         results.append({
             'hash': commit_hash,
             'subject': subject,
+            'sob': commit.get('sob', ''),
+            'public_bug': commit.get('public_bug', ''),
+            'private_bugs': commit.get('private_bugs', ''),
+            'oem_project': commit.get('oem_project', ''),
             'found': len(found_in) > 0,
             'found_in': found_in,
             'score': best_score,
@@ -814,14 +934,34 @@ Examples:
         enhanced_html = generate_enhanced_html(html_content, results_dict)
         
         # Save HTML
-        if args.html_output:
-            html_output = Path(args.html_output)
+        output_path = args.output or args.html_output
+        if output_path:
+            html_output = Path(output_path)
         else:
             html_output = Path(f"{input_filename}_enhanced.html")
         
         html_output.write_text(enhanced_html)
         print(f"\nEnhanced HTML saved to: {html_output}")
         print("New columns added: Emailed?, Version, Email Match, Email Link, Found In")
+
+    # Generate Markdown output if requested
+    if args.format == 'markdown':
+        print("\n" + "=" * 80)
+        print("STEP 4: Generating Markdown report")
+        print("=" * 80)
+
+        markdown = generate_markdown_report(
+            results, input_arg, args.months, found_count, not_found_count
+        )
+
+        output_path = args.output or args.html_output
+        if output_path:
+            md_output = Path(output_path)
+        else:
+            md_output = Path(f"{input_filename}.md")
+
+        md_output.write_text(markdown)
+        print(f"\nMarkdown report saved to: {md_output}")
 
 
 if __name__ == "__main__":

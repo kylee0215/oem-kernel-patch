@@ -13,7 +13,7 @@ permissions:
 env:
     # Full source link. Change this one variable if the delta URL changes;
     # the output filename is derived from the URL's stem, e.g.
-    # .../oem-6.17-resolute.html -> reports/oem-6.17-resolute_enhanced.html
+    # .../oem-6.17-resolute.html -> reports/oem-6.17-resolute.md
     SOURCE_URL: https://kernel.ubuntu.com/oem-delta/oem-6.17-resolute.html
 
 jobs:
@@ -32,15 +32,15 @@ jobs:
         - name: Install dependencies
           run: pip install -r requirements.txt
 
-        - name: Generate enhanced HTML report
+        - name: Generate Markdown report
           run: |
             mkdir -p reports
             # Derive the output name from the source URL's filename stem
             stem=$(basename "$SOURCE_URL" .html)
             python check_kernel_team_emails.py \
               "$SOURCE_URL" \
-              --format html \
-              --html-output "reports/${stem}_enhanced.html"
+              --format markdown \
+              --output "reports/${stem}.md"
 
         - name: Commit and push reports
           run: |
