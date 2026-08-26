@@ -2,8 +2,8 @@ name: Generate Daily Report
 
 on:
     schedule:
-    # This runs the script every day at 05:30 UTC
-        - cron: '30 5 * * *'
+    # This runs the script every hour (at minute 0)
+        - cron: '0 * * * *'
     workflow_dispatch:
     # This allows you to run the script manually from the "Actions" tab
 
