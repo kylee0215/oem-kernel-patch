@@ -285,13 +285,15 @@ def propagate_cover_letter_status(entries):
 
 
 def count_acks(entries):
-    """Count ACK reviews per normalized subject.
+    """Count ACK reviews per (normalized subject, patch version).
 
-    Combines direct ACK replies (entries whose own status prefix is an ACK) with
-    ACKs inherited from a cover letter. propagate_cover_letter_status stores the
-    cover-letter ACK tally in each individual patch's 'inherited_ack_count'.
+    ACKs are tallied separately for each patch revision (v1, v2, ...) so that a
+    respin never inherits the ACKs of an older version. Combines direct ACK
+    replies (entries whose own status prefix is an ACK) with ACKs inherited from
+    a cover letter (propagate_cover_letter_status stores that tally in each
+    individual patch's 'inherited_ack_count').
 
-    Returns: dict mapping normalized_subject -> ack_count (int).
+    Returns: dict mapping (normalized_subject, version) -> ack_count (int).
 
     Note: counting is by ACK email, not by distinct reviewer. The thread index
     exposes only subjects, so a reviewer who ACKs both the cover letter and an
@@ -303,15 +305,16 @@ def count_acks(entries):
         norm = normalize_subject(entry['bare']).lower()
         if not norm:
             continue
+        key = (norm, extract_patch_version(entry['subject']))
         if _is_ack(entry['prefix']):
-            direct[norm] = direct.get(norm, 0) + 1
+            direct[key] = direct.get(key, 0) + 1
         ia = entry['inherited_ack_count']
-        if ia > inherited.get(norm, 0):
-            inherited[norm] = ia
+        if ia > inherited.get(key, 0):
+            inherited[key] = ia
 
     return {
-        norm: direct.get(norm, 0) + inherited.get(norm, 0)
-        for norm in set(direct) | set(inherited)
+        key: direct.get(key, 0) + inherited.get(key, 0)
+        for key in set(direct) | set(inherited)
     }
 
 
@@ -321,45 +324,50 @@ def build_email_index(entries):
     Returns: dict mapping
         normalized_subject -> (original_subject, effective_prefix, version, link, ack_count)
 
-    APPLIED > NACK/NAK > ACK/CMNT/other. Higher-priority status always wins
-    regardless of version. Among equal-priority entries the highest version wins.
-    ack_count is the number of ACK reviews (see count_acks).
+    Only the LATEST patch version present for a subject is considered; once a
+    respin exists (e.g. v2), every field reported here reflects that newest
+    version and all older-version status/ACKs are ignored entirely. Among the
+    latest-version entries, status priority APPLIED > NACK/NAK > ACK/CMNT/other
+    decides the effective status; on a tie the first status-bearing entry wins so
+    the link points at the patch submission rather than a later review reply.
+    ack_count is the ACK tally for that latest version only (see count_acks).
     """
     ack_counts = count_acks(entries)
-    index = {}
 
+    groups = {}
     for entry in entries:
         norm = normalize_subject(entry['bare']).lower()
         if not norm:
             continue
+        groups.setdefault(norm, []).append(entry)
 
-        is_direct = bool(entry['prefix'])
-        effective = entry['prefix'] or entry['inherited_prefix']
-        new_priority = _status_priority(effective)
-        version = extract_patch_version(entry['subject'])
+    index = {}
+    for norm, group in groups.items():
+        latest_version = max(extract_patch_version(e['subject']) for e in group)
 
-        if norm not in index:
-            index[norm] = (entry['subject'], effective, new_priority, version, entry['link'])
-        else:
-            _, existing_status, existing_priority, existing_version, _ = index[norm]
-            if new_priority > existing_priority:
-                # Higher-priority status wins regardless of version
-                index[norm] = (entry['subject'], effective, new_priority, version, entry['link'])
-            elif new_priority == existing_priority:
-                # Same priority: prefer higher version; on tie, prefer entries with a status
-                if version > existing_version:
-                    index[norm] = (entry['subject'], effective, new_priority, version, entry['link'])
-                elif version == existing_version:
-                    if is_direct and not existing_status:
-                        index[norm] = (entry['subject'], effective, new_priority, version, entry['link'])
-                    elif not existing_status and effective:
-                        index[norm] = (entry['subject'], effective, new_priority, version, entry['link'])
+        best_subject = best_effective = best_link = None
+        best_priority = -1
+        for entry in group:
+            if extract_patch_version(entry['subject']) != latest_version:
+                continue
+            effective = entry['prefix'] or entry['inherited_prefix']
+            priority = _status_priority(effective)
+            if priority > best_priority or (
+                    priority == best_priority and not best_effective and effective):
+                best_subject = entry['subject']
+                best_effective = effective
+                best_link = entry['link']
+                best_priority = priority
 
-    # Strip the internal priority before returning
-    return {
-        norm: (subj, prefix, ver, link, ack_counts.get(norm, 0))
-        for norm, (subj, prefix, _, ver, link) in index.items()
-    }
+        index[norm] = (
+            best_subject,
+            best_effective,
+            latest_version,
+            best_link,
+            ack_counts.get((norm, latest_version), 0),
+        )
+
+    return index
 
 
 def search_commit_in_archive(email_index, subject, year, month):
@@ -419,6 +427,43 @@ def search_commit_in_archive(email_index, subject, year, month):
         month, year, subject
     )
     return False, 0, None, None, None, None, None, 0
+
+
+def select_latest_match(matches):
+    """Combine a commit's per-archive matches, keeping only the newest version.
+
+    Threads can span multiple monthly archives, so a single patch version may be
+    matched in more than one month. This keeps only the highest version number
+    seen across all archives and, for that version, sums the ACK tallies from
+    each archive and takes the highest-priority status
+    (APPLIED > NACK/NAK > ACK/CMNT/other). Older versions are dropped entirely so
+    a superseded revision never contributes its status or ACKs.
+
+    matches: list of dicts with keys score, match_type, link, email_subject,
+    email_prefix, version, ack_count.
+    Returns a single combined dict, or None when matches is empty.
+    """
+    if not matches:
+        return None
+
+    latest_version = max(m['version'] for m in matches)
+    latest = [m for m in matches if m['version'] == latest_version]
+
+    # Representative record for the newest version: strongest status wins, with
+    # match score as a tiebreaker so the clearest match supplies link/subject.
+    rep = max(latest, key=lambda m: (_status_priority(m['email_prefix']), m['score']))
+
+    return {
+        'score': rep['score'],
+        'match_type': rep['match_type'],
+        'link': rep['link'],
+        'email_subject': rep['email_subject'],
+        'email_prefix': rep['email_prefix'],
+        'version': latest_version,
+        # ACK emails live in the month they were posted, so sum across archives
+        # to get the full tally for this version (disjoint sets, no double count).
+        'ack_count': sum(m['ack_count'] for m in latest),
+    }
 
 
 def print_thread_hierarchy(archives):
@@ -797,13 +842,7 @@ Examples:
         subject = commit['subject']
         
         found_in = []
-        best_score = 0
-        best_match_type = None
-        best_link = None
-        best_email_subject = None
-        best_email_prefix = None
-        best_version = None
-        best_ack_count = 0
+        matches = []
 
         for archive in archives:
             found, score, match_type, link, email_subject, email_prefix, version, ack_count = search_commit_in_archive(
@@ -813,19 +852,18 @@ Examples:
                 archive['month']
             )
             if found:
-                archive_info = f"{archive['month']} {archive['year']}"
-                found_in.append(archive_info)
-                # Prefer higher version; use score as tiebreaker
-                if (best_version is None
-                        or version > best_version
-                        or (version == best_version and score > best_score)):
-                    best_score = score
-                    best_match_type = match_type
-                    best_link = link
-                    best_email_subject = email_subject
-                    best_email_prefix = email_prefix
-                    best_version = version
-                    best_ack_count = ack_count
+                found_in.append(f"{archive['month']} {archive['year']}")
+                matches.append({
+                    'score': score,
+                    'match_type': match_type,
+                    'link': link,
+                    'email_subject': email_subject,
+                    'email_prefix': email_prefix,
+                    'version': version,
+                    'ack_count': ack_count,
+                })
+
+        best = select_latest_match(matches) or {}
 
         results.append({
             'hash': commit_hash,
@@ -836,13 +874,13 @@ Examples:
             'oem_project': commit.get('oem_project', ''),
             'found': len(found_in) > 0,
             'found_in': found_in,
-            'score': best_score,
-            'match_type': best_match_type,
-            'link': best_link,
-            'email_subject': best_email_subject,
-            'email_prefix': best_email_prefix,
-            'version': best_version,
-            'ack_count': best_ack_count,
+            'score': best.get('score', 0),
+            'match_type': best.get('match_type'),
+            'link': best.get('link'),
+            'email_subject': best.get('email_subject'),
+            'email_prefix': best.get('email_prefix'),
+            'version': best.get('version'),
+            'ack_count': best.get('ack_count', 0),
         })
     
     # Print results
