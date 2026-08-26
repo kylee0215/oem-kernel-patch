@@ -1,6 +1,6 @@
 # Kernel-Team Email Check — oem-6.17-resolute
 
-_Generated: 2026-08-26 09:44:40 UTC_
+_Generated: 2026-08-26 10:37:41 UTC_
 
 **Source:** https://kernel.ubuntu.com/oem-delta/dev/oem-6.17-resolute.html
 
@@ -26,7 +26,7 @@ _Generated: 2026-08-26 09:44:40 UTC_
 | `71959b21f984` | ASoC: SDCA: Add sdca_irq_cleanup_late() | [2163215](https://bugs.launchpad.net/bugs/2163215) | [cpl-325](https://warthogs.atlassian.net/browse/cpl-325) | sent | v2 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171235.html) | August 2026 | Chris |
 | `b2e62a968554` | ASoC: SDCA: Rename sdca_irq_allocate() to include devm | [2163215](https://bugs.launchpad.net/bugs/2163215) | [cpl-325](https://warthogs.atlassian.net/browse/cpl-325) | sent | v2 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171233.html) | August 2026 | Chris |
 | `a5979f4d88c1` | ASoC: SDCA: Correct kernel doc for sdca_irq_cleanup() | [2163215](https://bugs.launchpad.net/bugs/2163215) | [cpl-325](https://warthogs.atlassian.net/browse/cpl-325) | sent | v2 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171234.html) | August 2026 | Chris |
-| `96be68a19737` | ice: wait for reset completion in ice_resume() | [2162803](https://bugs.launchpad.net/bugs/2162803) | [sutton-4006](https://warthogs.atlassian.net/browse/sutton-4006), [sutton-4745](https://warthogs.atlassian.net/browse/sutton-4745) | ACK[R] | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170645.html) | August 2026 | Aaron |
+| `96be68a19737` | ice: wait for reset completion in ice_resume() | [2162803](https://bugs.launchpad.net/bugs/2162803) | [sutton-4006](https://warthogs.atlassian.net/browse/sutton-4006), [sutton-4745](https://warthogs.atlassian.net/browse/sutton-4745) | APPLIED[R] | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170645.html) | August 2026 | Aaron |
 | `a9bd124e81ed` | Revert "UBUNTU: SAUCE: usb: typec: ucsi: Detect and skip duplicate altmodes from buggy firmware" | [2162695](https://bugs.launchpad.net/bugs/2162695) | [somerville-4776](https://warthogs.atlassian.net/browse/somerville-4776), [somerville-4933](https://warthogs.atlassian.net/browse/somerville-4933), [somerville-4948](https://warthogs.atlassian.net/browse/somerville-4948) | APPLIED | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170629.html) | August 2026 | Chia-Lin |
 | `88c7115617e3` | UBUNTU: SAUCE: drm/i915/tc: Revert forced DP-alt connected workaround | [2160082](https://bugs.launchpad.net/bugs/2160082) | [cpl-327](https://warthogs.atlassian.net/browse/cpl-327) | ACK*2 | v2 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171203.html) | August 2026 | ChunAn |
 | `c70f2fcf9520` | UBUNTU: SAUCE: r8169: gate RTL8116AF fixes behind Dell P5M1260 quirk | [2160475](https://bugs.launchpad.net/bugs/2160475) | [wtn-372](https://warthogs.atlassian.net/browse/wtn-372) | NACK/CMNT | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-July/170135.html) | July 2026 | Chia-Lin |
