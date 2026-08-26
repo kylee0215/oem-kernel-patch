@@ -1,18 +1,22 @@
 # Kernel-Team Email Check — oem-6.17-resolute
 
-_Generated: 2026-08-25 06:39:28 UTC_
+_Generated: 2026-08-26 01:56:53 UTC_
 
 **Source:** https://kernel.ubuntu.com/oem-delta/oem-6.17-resolute.html
 
 **Checked against:** last 3 month(s) of kernel-team archives
 
-**Summary:** 23 found, 6 not found · 0 ready to apply (ACK'd with ≥2 ACKs)
+**Summary:** 23 found, 6 not found · 1 ready to apply (ACK'd with ≥2 ACKs)
+
+## Ready to apply (≥2 ACKs)
+
+- `88c7115617e3` ACK/CMNT*3 — UBUNTU: SAUCE: drm/i915/tc: Revert forced DP-alt connected workaround
 
 ## All checked commits
 
 | Hash | Subject | Public bug | Private bug | Emailed? | Version | Match | Link | Found In | Signed-off-by |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `e9c4c6c91471` | ASoC: sdw_utils: Add missed component_name strings for TI amps | [2164504](https://bugs.launchpad.net/bugs/2164504) | [stella-3568](https://warthogs.atlassian.net/browse/stella-3568) | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171150.html) | August 2026 | Chia-Lin |
+| `e9c4c6c91471` | ASoC: sdw_utils: Add missed component_name strings for TI amps | [2164504](https://bugs.launchpad.net/bugs/2164504) | [stella-3568](https://warthogs.atlassian.net/browse/stella-3568) | ACK | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171150.html) | August 2026 | Chia-Lin |
 | `38573fd563ab` | ASoC: SDCA: Move kcontrol search out of IRQ | [2163215](https://bugs.launchpad.net/bugs/2163215) | - | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171131.html) | August 2026 | Chris |
 | `d9db0ad11c05` | ASoC: SDCA: Switch to fixup_controls callback for IRQ registration | [2163215](https://bugs.launchpad.net/bugs/2163215) | - | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171130.html) | August 2026 | Chris |
 | `0f380e30f69f` | ASoC: Add a component fixup_controls callback | [2163215](https://bugs.launchpad.net/bugs/2163215) | - | sent | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171129.html) | August 2026 | Chris |
@@ -25,7 +29,7 @@ _Generated: 2026-08-25 06:39:28 UTC_
 | `32b4493b7390` | Revert "UBUNTU: SAUCE: usb: typec: ucsi: yoga_c630: Remove redundant duplicate altmode handling" | [2162695](https://bugs.launchpad.net/bugs/2162695) | [somerville-4948](https://warthogs.atlassian.net/browse/somerville-4948), [somerville-4933](https://warthogs.atlassian.net/browse/somerville-4933), [somerville-4776](https://warthogs.atlassian.net/browse/somerville-4776) | APPLIED | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170631.html) | August 2026 | Chia-Lin |
 | `8f4546b7d3b0` | Revert "UBUNTU: SAUCE: usb: typec: ucsi: Add duplicate detection to nvidia registration path" | [2162695](https://bugs.launchpad.net/bugs/2162695) | [somerville-4948](https://warthogs.atlassian.net/browse/somerville-4948), [somerville-4933](https://warthogs.atlassian.net/browse/somerville-4933), [somerville-4776](https://warthogs.atlassian.net/browse/somerville-4776) | APPLIED | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170630.html) | August 2026 | Chia-Lin |
 | `a9bd124e81ed` | Revert "UBUNTU: SAUCE: usb: typec: ucsi: Detect and skip duplicate altmodes from buggy firmware" | [2162695](https://bugs.launchpad.net/bugs/2162695) | [somerville-4948](https://warthogs.atlassian.net/browse/somerville-4948), [somerville-4933](https://warthogs.atlassian.net/browse/somerville-4933), [somerville-4776](https://warthogs.atlassian.net/browse/somerville-4776) | APPLIED | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170629.html) | August 2026 | Chia-Lin |
-| `88c7115617e3` | UBUNTU: SAUCE: drm/i915/tc: Revert forced DP-alt connected workaround | [2160082](https://bugs.launchpad.net/bugs/2160082) | [cpl-327](https://warthogs.atlassian.net/browse/cpl-327) | ACK/CMNT | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170751.html) | August 2026 | ChunAn |
+| `88c7115617e3` | UBUNTU: SAUCE: drm/i915/tc: Revert forced DP-alt connected workaround | [2160082](https://bugs.launchpad.net/bugs/2160082) | [cpl-327](https://warthogs.atlassian.net/browse/cpl-327) | ACK/CMNT*3 | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170751.html) | August 2026 | ChunAn |
 | `c70f2fcf9520` | UBUNTU: SAUCE: r8169: gate RTL8116AF fixes behind Dell P5M1260 quirk | [2160475](https://bugs.launchpad.net/bugs/2160475) | [wtn-372](https://warthogs.atlassian.net/browse/wtn-372) | NACK/CMNT | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-July/170135.html) | July 2026 | Chia-Lin |
 | `97c1a2096415` | UBUNTU: SAUCE: r8169: fix RTL8116af can not enter s0idle and c10 | [2160475](https://bugs.launchpad.net/bugs/2160475) | [wtn-372](https://warthogs.atlassian.net/browse/wtn-372) | NACK/CMNT | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-July/170134.html) | July 2026 | Chia-Lin |
 | `a172ada0e76c` | UBUNTU: SAUCE: r8169: add ltr support for RTL8116af | [2160475](https://bugs.launchpad.net/bugs/2160475) | [wtn-372](https://warthogs.atlassian.net/browse/wtn-372) | NACK/CMNT | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-July/170133.html) | July 2026 | Chia-Lin |
