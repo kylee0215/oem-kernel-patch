@@ -112,7 +112,7 @@ def normalize_subject(subject):
     return s
 
 
-_COVER_LETTER_RE = re.compile(r'\bPATCH(?:\s*v\d+)?\s+0\s*/\s*\d+\b', re.IGNORECASE)
+_COVER_LETTER_RE = re.compile(r'\bPATCH(?:\s*v\d+)?\s+0+\s*/\s*\d+\b', re.IGNORECASE)
 _PATCH_VERSION_RE = re.compile(r'(?:PATCH\s*v|(?<!\w)v)(\d+)\b', re.IGNORECASE)
 
 
