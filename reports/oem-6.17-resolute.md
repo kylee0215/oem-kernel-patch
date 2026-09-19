@@ -1,12 +1,12 @@
 # Kernel-Team Email Check — oem-6.17-resolute
 
-_Generated: 2026-09-19 09:15:19 UTC_
+_Generated: 2026-09-19 13:45:46 UTC_
 
 **Source:** https://kernel.ubuntu.com/oem-delta/dev/oem-6.17-resolute.html
 
 **Checked against:** last 3 month(s) of kernel-team archives
 
-**Summary:** 10 found, 3 not found · 0 ready to apply (ACK'd with ≥2 ACKs)
+**Summary:** 9 found, 4 not found · 0 ready to apply (ACK'd with ≥2 ACKs)
 
 ## All checked commits
 
@@ -21,7 +21,7 @@ _Generated: 2026-09-19 09:15:19 UTC_
 | `b2e62a968554` | ASoC: SDCA: Rename sdca_irq_allocate() to include devm | [2163215](https://bugs.launchpad.net/bugs/2163215) | [cpl-325](https://warthogs.atlassian.net/browse/cpl-325) | sent | v6 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-September/172059.html) | September 2026, August 2026 | Chris |
 | `a5979f4d88c1` | ASoC: SDCA: Correct kernel doc for sdca_irq_cleanup() | [2163215](https://bugs.launchpad.net/bugs/2163215) | [cpl-325](https://warthogs.atlassian.net/browse/cpl-325) | NACK/CMNT | v2 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/171234.html) | August 2026 | Chris |
 | `a9bd124e81ed` | Revert "UBUNTU: SAUCE: usb: typec: ucsi: Detect and skip duplicate altmodes from buggy firmware" | [2162695](https://bugs.launchpad.net/bugs/2162695) | [somerville-4776](https://warthogs.atlassian.net/browse/somerville-4776), [somerville-4933](https://warthogs.atlassian.net/browse/somerville-4933), [somerville-4948](https://warthogs.atlassian.net/browse/somerville-4948) | APPLIED | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-August/170629.html) | August 2026 | Chia-Lin |
-| `faad731a9dd9` | UBUNTU: SAUCE: wifi: ath12k: avoid MHI deinit during suspend | [2160183](https://bugs.launchpad.net/bugs/2160183) | - | NACK/CMNT | v1 | 100% | [email](https://lists.ubuntu.com/archives/kernel-team/2026-July/169962.html) | July 2026 | ChunAn,Kuan-Ying |
+| `faad731a9dd9` | UBUNTU: SAUCE: wifi: ath12k: avoid MHI deinit during suspend | [2160183](https://bugs.launchpad.net/bugs/2160183) | - | No | - | - | - | - | ChunAn,Kuan-Ying |
 | `8acc4006b129` | UBUNTU: SAUCE: tools: clamp sizeof in perf_cpu_map__merge | [2132312](https://bugs.launchpad.net/bugs/2132312) | - | No | - | - | - | - | Stefan |
 | `4c41280bee2b` | UBUNTU: [Config] Set TOUCHSCREEN_APPLE_Z2=m (arm64) | [2115758](https://bugs.launchpad.net/bugs/2115758) | - | No | - | - | - | - | Juerg,Timo |
 | `0cb67e7682f7` | UBUNTU: [Config] Enable SYM53C8XX_2 on arm64 | [2118499](https://bugs.launchpad.net/bugs/2118499) | - | No | - | - | - | - | Benjamin,Mehmet,Timo |
