@@ -1,6 +1,6 @@
 # Kernel-Team Email Check — oem-6.17-resolute
 
-_Generated: 2026-10-04 16:37:28 UTC_
+_Generated: 2026-10-04 19:55:35 UTC_
 
 **Source:** https://kernel.ubuntu.com/oem-delta/dev/oem-6.17-resolute.html
 
