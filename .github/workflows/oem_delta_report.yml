@@ -2,8 +2,9 @@ name: Generate OEM Delta Report
 
 on:
     schedule:
-    # This runs the script every hour (at minute 0)
-        - cron: '0 * * * *'
+    # Runs every hour at minute 17; off-peak minutes are less likely to be
+    # delayed or skipped than the heavily contended top of the hour.
+        - cron: '17 * * * *'
     workflow_dispatch:
     # This allows you to run the script manually from the "Actions" tab
 
@@ -37,15 +38,34 @@ jobs:
             mkdir -p reports
             # Derive the output name from the source URL's filename stem
             stem=$(basename "$SOURCE_URL" .html)
+            out="reports/${stem}.md"
             python check_kernel_team_emails.py \
               "$SOURCE_URL" \
               --format markdown \
-              --output "reports/${stem}.md"
+              --output "${out}.new"
+            # The report embeds a "_Generated:" timestamp that changes on every
+            # run, so compare with that line stripped to detect real changes.
+            if [ -f "$out" ]; then
+              old=$(mktemp); new=$(mktemp)
+              sed '/^_Generated:/d' "$out" > "$old"
+              sed '/^_Generated:/d' "${out}.new" > "$new"
+              if cmp -s "$old" "$new"; then
+                rm -f "${out}.new" "$old" "$new"
+                echo "Report content unchanged; keeping the existing file."
+                exit 0
+              fi
+              rm -f "$old" "$new"
+            fi
+            mv "${out}.new" "$out"
 
         - name: Commit and push reports
           run: |
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"
             git add reports/
-            # Only commit if the file actually changed to avoid empty commit errors
-            git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Report Update: $(date)" && git push)
+            if git diff --cached --quiet; then
+              echo "Nothing to commit."
+            else
+              git commit -m "Automated report update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+              git push
+            fi
